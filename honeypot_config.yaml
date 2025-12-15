@@ -1,0 +1,107 @@
+# Honeypot Configuration File
+# Edit this file to configure your honeypot settings
+
+general:
+  honeypot_name: corporate-server-01  # Unique identifier for this honeypot
+  log_level: INFO  # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# Kafka configuration for event streaming
+kafka:
+  enabled: true  # Set to true to enable Kafka reporting
+  bootstrap_servers:
+    - 192.168.88.176:9092
+    # - kafka1.example.com:9092
+    # - kafka2.example.com:9092
+  topic: honey
+
+  # Optional: SSL/SASL configuration
+  ssl_enabled: false
+  sasl_mechanism: null  # Options: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+  sasl_username: null
+  sasl_password: null
+
+# Webhook configuration for event reporting
+webhook:
+  enabled: false  # Set to true to enable webhook reporting
+  url: http://localhost:8080/webhook  # Your webhook endpoint
+  timeout: 5  # Request timeout in seconds
+  retry_attempts: 3  # Number of retry attempts on failure
+
+  # Optional: Custom headers for authentication
+  headers:
+    Content-Type: application/json
+    X-API-Key: your-api-key-here
+    # Authorization: Bearer your-token-here
+
+# Service configurations
+services:
+  # SMB/File Server Honeypot
+  smb:
+    enabled: true
+    port: 4445  # Use 445 for production (requires root), 4445 for testing
+    banner: Windows Server 2019
+    fake_shares:
+      - Documents
+      - Shared
+      - Backups
+      - Finance
+      - HR
+      - IT
+      - Legal
+
+  # HTTP/Web Server Honeypot
+  http:
+    enabled: true
+    port: 8000  # Use 80 for production (requires root), 8000 for testing
+    server_header: Apache/2.4.41 (Ubuntu)
+    fake_hostname: intranet.company.local
+
+  # LDAP Directory Service Honeypot
+  ldap:
+    enabled: true
+    port: 3389  # Use 389 for production (requires root), 3389 for testing
+    base_dn: DC=company,DC=com
+    fake_users:
+      - CN=John Doe,OU=Users,DC=company,DC=com
+      - CN=Jane Smith,OU=Users,DC=company,DC=com
+      - CN=Bob Johnson,OU=Users,DC=company,DC=com
+      - CN=Admin,OU=Admins,DC=company,DC=com
+      - CN=Service Account,OU=Service,DC=company,DC=com
+      - CN=Database Admin,OU=Admins,DC=company,DC=com
+
+# Alerting configuration
+alerting:
+  alert_on_connection: false  # Alert on every connection (can be noisy)
+  alert_on_auth_attempt: true  # Alert on authentication attempts
+  alert_on_suspicious_patterns: true  # Alert on known attack patterns
+
+  # Paths that trigger high-severity alerts
+  suspicious_paths:
+    - /admin
+    - /phpmyadmin
+    - /.git
+    - /.env
+    - /wp-admin
+    - /wp-login.php
+    - /files/passwords
+    - /files/database
+    - /files/config
+    - /.aws
+    - /.ssh
+    - /backup
+    - /db
+    - /sql
+    - /config
+
+  # Severity levels for different event types
+  severity_thresholds:
+    connection: low
+    auth_attempt: high
+    data_exfiltration: critical
+    suspicious_access: high
+
+# Rate limiting configuration
+rate_limiting:
+  enabled: true
+  max_connections_per_ip: 100  # Maximum connections per IP
+  time_window_seconds: 3600  # Time window in seconds (1 hour)
